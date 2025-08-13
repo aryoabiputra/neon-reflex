@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tes Reaksi — Mode Futuristik</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tes Reaksi — Mode Futuristik (Responsif)</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -14,7 +14,10 @@
   <main class="wrap">
     <section class="panel" role="application" aria-label="Tes Reaksi">
       <h1>TES REAKSI — NEON LAB</h1>
-      <p class="subtitle">Tekan <kbd>START</kbd> atau <kbd>Enter</kbd> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, tekan <kbd>Enter</kbd> secepatnya.</p>
+      <p class="subtitle">
+        <span class="desktop-only">Tekan <kbd>START</kbd> atau <kbd>Enter</kbd> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, tekan <kbd>Enter</kbd> secepatnya.</span>
+        <span class="mobile-only">Ketuk <b>START</b> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, ketuk di mana saja atau tombol <b>TAP</b>.</span>
+      </p>
 
       <div class="row" style="margin-bottom:10px">
         <span class="badge">⌛ Status: <strong id="status" class="status idle">Siap</strong></span>
@@ -23,14 +26,20 @@
       </div>
 
       <div id="readout" class="readout" aria-live="polite">&nbsp;</div>
-      <p class="hint">Tip: Tahan posisi jari di tombol <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks berubah.</p>
+      <p class="hint desktop-only">Tip: Tahan posisi jari di tombol <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks berubah.</p>
+      <p class="hint mobile-only">Tip: Saat menunggu, siap-siap jempol. Ketika teks berubah, <b>ketuk layar</b> secepatnya.</p>
 
       <div class="row">
         <button id="start" class="btn pulse" type="button">START</button>
-        <button id="klik" class="btn ghost" type="button" hidden>KLIK</button>
+        <button id="tap" class="btn ghost" type="button">TAP</button>
       </div>
     </section>
   </main>
-<script src="script.js"></script>
+
+  <!-- Overlay area to capture fast taps on mobile when ready -->
+  <div id="tapArea" class="tap-area" aria-hidden="true"></div>
+  <div id="tapHint" class="tap-hint">TAP!</div>
+
+  <script src="script.js"></script>
 </body>
 </html>
