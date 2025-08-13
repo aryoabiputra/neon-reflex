@@ -10,7 +10,7 @@ const tapHint    = document.getElementById('tapHint');
 // State
 let timer = null;
 let mulai = 0;
-let state = 'idle'; // 'idle' | 'waiting' | 'ready'
+let state = 'idle';
 let best = Number(localStorage.getItem('reaction_best_ms')) || null;
 if (best) bestEl.textContent = best + ' ms';
 
@@ -31,7 +31,6 @@ const readyVisual = (on) => {
   else   { tapArea.classList.remove('show'); tapHint.classList.remove('show'); }
 };
 const setStartInteractive = (on) => {
-  // KUNCI START saat waiting/ready agar tidak bisa diklik/ketuk
   startBtn.disabled = !on;
   startBtn.classList.toggle('is-disabled', !on);
 };
@@ -63,8 +62,19 @@ const cueReady      = () => { beep(1200,120,'sine',0.04); vibrate(30); };
 const cueFalseStart = () => { beep(240,160,'square',0.04); vibrate([40,60,80]); };
 const cueSuccess    = () => { beep(900,70,'sine',0.035); setTimeout(()=>beep(1300,80,'sine',0.035),90); vibrate(25); };
 
+// Fungsi kirim event ke GA4
+function sendGAEvent(eventName, params = {}) {
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, params);
+  }
+}
+
 // --- Game Flow ---
 function mulaiGame(){
+  sendGAEvent('start_game', {
+    player_name: localStorage.getItem('neon_reflex_name') || 'anonymous'
+  });
+
   ensureAudio();
   if (state !== 'idle') return;
   clearTimeout(timer);
@@ -73,10 +83,10 @@ function mulaiGame(){
   state = 'waiting';
   startBtn.blur();
   startBtn.classList.remove('pulse');
-  setStartInteractive(false);  // ⛔ matikan START
+  setStartInteractive(false);
   readyVisual(false);
 
-  const delay = Math.random() * 2000 + 800; // 0.8s–2.8s
+  const delay = Math.random() * 2000 + 800;
   timer = setTimeout(() => {
     setStatus('Klik sekarang!', 'ready');
     requestAnimationFrame(() => {
@@ -95,9 +105,13 @@ function stopAndMeasure(){
   readoutEl.textContent = ms + ' ms';
   setStatus('Bagus! Tekan START/Enter untuk coba lagi.', 'idle');
   updateBest(ms);
+  sendGAEvent('finish_game', {
+    player_name: localStorage.getItem('neon_reflex_name') || 'anonymous',
+    reaction_time: ms
+  });
   state = 'idle';
   startBtn.classList.add('pulse');
-  setStartInteractive(true);   // ✅ hidupkan START kembali
+  setStartInteractive(true);
   readyVisual(false); cueSuccess();
 }
 
@@ -110,17 +124,21 @@ document.addEventListener('keydown', (ev) => {
   ev.preventDefault();
   if (ev.repeat) return;
   if (state === 'idle')    { mulaiGame(); return; }
-  if (state === 'waiting'){ // false start
+  if (state === 'waiting'){
     clearTimeout(timer); timer = null; state = 'idle';
     setStatus('Kepagian! Tekan START/Enter untuk ulang.', 'bad');
     startBtn.classList.add('pulse');
     setStartInteractive(true);
-    readyVisual(false); cueFalseStart(); return;
+    readyVisual(false); cueFalseStart();
+    sendGAEvent('false_start', {
+      player_name: localStorage.getItem('neon_reflex_name') || 'anonymous'
+    });
+    return;
   }
   if (state === 'ready')   { stopAndMeasure(); }
 });
 
-// TAP button (start/stop) — prioritaskan TAP, cegah bubble ke START
+// TAP button (start/stop)
 const tapAction = (e) => {
   e.preventDefault(); e.stopPropagation();
   if (state === 'idle')     { mulaiGame(); return; }
@@ -129,20 +147,24 @@ const tapAction = (e) => {
     setStatus('Kepagian! Tekan START untuk ulang.', 'bad');
     startBtn.classList.add('pulse');
     setStartInteractive(true);
-    readyVisual(false); cueFalseStart(); return;
+    readyVisual(false); cueFalseStart();
+    sendGAEvent('false_start', {
+      player_name: localStorage.getItem('neon_reflex_name') || 'anonymous'
+    });
+    return;
   }
   if (state === 'ready')    { stopAndMeasure(); }
 };
 tapBtn.addEventListener('pointerdown', tapAction, {passive:false});
 tapBtn.addEventListener('click', tapAction, {passive:false});
 
-// Overlay full-screen saat READY — menyerap ketukan supaya tidak kena START
+// Overlay saat READY
 tapArea.addEventListener('pointerdown', (e) => {
   e.preventDefault(); e.stopPropagation();
   if (state === 'ready') stopAndMeasure();
 }, {passive:false});
 
-// Awal tampilan
+// Awal
 setStatus('Siap', 'idle');
 startBtn.classList.add('pulse');
 setStartInteractive(true);
