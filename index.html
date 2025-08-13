@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Neon Reflex - Tes Reaksi Futuristik</title>
-  <meta name="description" content="Uji kecepatan reaksi kamu di Neon Reflex Lab. Tekan START/Enter atau TAP saat sinyal muncul, catat best time-mu!" />
+  <meta name="description"
+    content="Uji kecepatan reaksi kamu di Neon Reflex Lab. Tekan START/Enter atau TAP saat sinyal muncul, catat best time-mu!" />
   <meta name="theme-color" content="#0a1224" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#0b0f1a">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCVYTX1BJN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-TCVYTX1BJN');
+  </script>
+
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <!-- Background grid -->
   <div class="grid" aria-hidden="true"></div>
@@ -20,8 +34,10 @@
       <h1>NEON REFLEX </h1>
 
       <p class="subtitle">
-        <span class="desktop-only">Tekan <kbd>START</kbd> atau <kbd>Enter</kbd> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, tekan <kbd>Enter</kbd> secepatnya.</span>
-        <span class="mobile-only">Ketuk <b>START</b> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, ketuk tombol <b>TAP</b> atau layar.</span>
+        <span class="desktop-only">Tekan <kbd>START</kbd> atau <kbd>Enter</kbd> untuk mulai. Saat muncul <em>“Klik
+            sekarang!”</em>, tekan <kbd>Enter</kbd> secepatnya.</span>
+        <span class="mobile-only">Ketuk <b>START</b> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, ketuk tombol
+          <b>TAP</b> atau layar.</span>
       </p>
 
       <div class="row" style="margin-bottom:10px">
@@ -31,7 +47,8 @@
       </div>
 
       <div id="readout" class="readout" aria-live="polite">&nbsp;</div>
-      <p class="hint desktop-only">Tip: Tahan posisi jari di <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks berubah.</p>
+      <p class="hint desktop-only">Tip: Tahan posisi jari di <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks
+        berubah.</p>
       <p class="hint mobile-only">Tip: Siapkan jempol di tombol <b>TAP</b>. Saat sinyal, ketuk secepatnya.</p>
 
       <div class="controls">
@@ -39,7 +56,7 @@
         <button id="tap" class="btn ghost" type="button" aria-label="Tap untuk berhenti saat sinyal">TAP</button>
       </div>
     </section>
-   
+
   </main>
 
   <!-- Overlay full-screen untuk menyerap ketukan saat READY -->
@@ -52,4 +69,5 @@
 
   <script defer src="script.js"></script>
 </body>
+
 </html>
