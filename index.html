@@ -3,43 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Neon Reflex</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Neon Reflex - Tes Reaksi Futuristik</title>
+  <meta name="description" content="Uji kecepatan reaksi kamu di Neon Reflex Lab. Tekan START/Enter atau TAP saat sinyal muncul, catat best time-mu!" />
+  <meta name="theme-color" content="#0a1224" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#0b0f1a">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Background grid -->
   <div class="grid" aria-hidden="true"></div>
+
   <main class="wrap">
     <section class="panel" role="application" aria-label="Tes Reaksi">
-      <h1>TES REAKSI — NEON REFLEX</h1>
+      <h1>NEON REFLEX </h1>
+
       <p class="subtitle">
         <span class="desktop-only">Tekan <kbd>START</kbd> atau <kbd>Enter</kbd> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, tekan <kbd>Enter</kbd> secepatnya.</span>
-        <span class="mobile-only">Ketuk <b>START</b> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, ketuk di mana saja atau tombol <b>TAP</b>.</span>
+        <span class="mobile-only">Ketuk <b>START</b> untuk mulai. Saat muncul <em>“Klik sekarang!”</em>, ketuk tombol <b>TAP</b> atau layar.</span>
       </p>
 
       <div class="row" style="margin-bottom:10px">
-        <span class="badge">⌛ Status: <strong id="status" class="status idle">Siap</strong></span>
+        <span class="badge">⌛ Status: <strong id="status" class="status idle" aria-live="polite">Siap</strong></span>
         <span class="spacer"></span>
         <span class="badge">🏁 Best: <strong id="best" class="best">—</strong></span>
       </div>
 
       <div id="readout" class="readout" aria-live="polite">&nbsp;</div>
-      <p class="hint desktop-only">Tip: Tahan posisi jari di tombol <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks berubah.</p>
-      <p class="hint mobile-only">Tip: Saat menunggu, siap-siap jempol. Ketika teks berubah, <b>ketuk layar</b> secepatnya.</p>
+      <p class="hint desktop-only">Tip: Tahan posisi jari di <kbd>Enter</kbd> saat menunggu, lalu tekan begitu teks berubah.</p>
+      <p class="hint mobile-only">Tip: Siapkan jempol di tombol <b>TAP</b>. Saat sinyal, ketuk secepatnya.</p>
 
-      <div class="row">
-        <button id="start" class="btn pulse" type="button">START</button>
-        <button id="tap" class="btn ghost" type="button">TAP</button>
+      <div class="controls">
+        <button id="start" class="btn pulse" type="button" aria-label="Mulai">START</button>
+        <button id="tap" class="btn ghost" type="button" aria-label="Tap untuk berhenti saat sinyal">TAP</button>
       </div>
     </section>
   </main>
 
-  <!-- Overlay area to capture fast taps on mobile when ready -->
-  <div id="tapArea" class="tap-area" aria-hidden="true"></div>
+  <!-- Overlay full-screen untuk menyerap ketukan saat READY -->
+  <div id="tapArea" class="tap-area" aria-hidden="true" role="button" aria-label="Area ketuk"></div>
   <div id="tapHint" class="tap-hint">TAP!</div>
 
-  <script src="script.js"></script>
+  <script defer src="script.js"></script>
 </body>
 </html>
