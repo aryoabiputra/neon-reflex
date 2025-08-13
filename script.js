@@ -1,10 +1,12 @@
 
 // Elemen
 const startBtn = document.getElementById('start');
-const klikBtn = document.getElementById('klik'); // tidak dipakai, tetap disertakan
+const tapBtn = document.getElementById('tap');
 const statusEl = document.getElementById('status');
 const readoutEl = document.getElementById('readout');
 const bestEl = document.getElementById('best');
+const tapArea = document.getElementById('tapArea');
+const tapHint = document.getElementById('tapHint');
 
 // State
 let timer = null;
@@ -26,13 +28,55 @@ const updateBest = (ms) => {
     }
 };
 
-const softReset = () => {
-    clearTimeout(timer); timer = null; mulai = 0; state = 'idle';
-    setStatus('Siap', 'idle');
-    startBtn.classList.add('pulse');
+const readyVisual = (on) => {
+    if (on) { tapArea.classList.add('show'); tapHint.classList.add('show'); }
+    else { tapArea.classList.remove('show'); tapHint.classList.remove('show'); }
 };
 
+// ====== Audio & Haptic ======
+let audioCtx = null;
+function ensureAudio() {
+    if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function beep(freq = 1000, duration = 120, type = 'sine', volume = 0.03) {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = volume;
+    o.connect(g); g.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    // simple envelope to avoid clicks
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(volume, now + 0.01);
+    g.gain.linearRampToValueAtTime(0.0001, now + duration / 1000);
+    o.start(now); o.stop(now + duration / 1000 + 0.02);
+}
+function vibrate(pattern) {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function cueReady() {
+    beep(1200, 120, 'sine', 0.04);
+    vibrate(30);
+}
+function cueFalseStart() {
+    beep(240, 160, 'square', 0.04);
+    vibrate([40, 60, 80]);
+}
+function cueSuccess() {
+    beep(900, 70, 'sine', 0.035);
+    setTimeout(() => beep(1300, 80, 'sine', 0.035), 90);
+    vibrate(25);
+}
+
+// --- Game Flow ---
 function mulaiGame() {
+    ensureAudio();
     if (state !== 'idle') return; // cegah dobel start
     clearTimeout(timer);
     readoutEl.textContent = '';
@@ -40,6 +84,7 @@ function mulaiGame() {
     state = 'waiting';
     startBtn.blur();
     startBtn.classList.remove('pulse');
+    readyVisual(false);
 
     const delay = Math.random() * 2000 + 800; // 0.8s–2.8s
     timer = setTimeout(() => {
@@ -49,45 +94,70 @@ function mulaiGame() {
             requestAnimationFrame((t) => {
                 mulai = t; // sama origin dengan performance.now()
                 state = 'ready';
+                readyVisual(true);
+                cueReady();
             });
         });
     }, delay);
 }
 
-// Start via mouse
+function stopAndMeasure() {
+    if (state !== 'ready') return; // safety
+    const akhir = performance.now();
+    const ms = Math.round(akhir - mulai);
+    readoutEl.textContent = ms + ' ms';
+    setStatus('Bagus! Tekan START/Enter untuk coba lagi.', 'idle');
+    updateBest(ms);
+    state = 'idle';
+    startBtn.classList.add('pulse');
+    readyVisual(false);
+    cueSuccess();
+}
+
+// Start via mouse/tap button
 startBtn.addEventListener('click', mulaiGame);
 
-// Keyboard handler — Enter untuk start & stop
+// Keyboard: Enter untuk start & stop (desktop)
 document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Enter') return;
     ev.preventDefault();
-    if (ev.repeat) return; // abaikan auto-repeat
-
-    if (state === 'idle') { // MULAI
-        mulaiGame();
-        return;
-    }
-
-    if (state === 'waiting') { // False start
+    if (ev.repeat) return;
+    if (state === 'idle') { mulaiGame(); return; }
+    if (state === 'waiting') {
+        // False start
         clearTimeout(timer); timer = null; state = 'idle';
         setStatus('Kepagian! Tekan START/Enter untuk ulang.', 'bad');
         startBtn.classList.add('pulse');
+        readyVisual(false);
+        cueFalseStart();
         return;
     }
-
-    if (state === 'ready') { // STOP
-        const akhir = performance.now();
-        const ms = Math.round(akhir - mulai);
-        readoutEl.textContent = ms + ' ms';
-        setStatus('Bagus! Tekan START/Enter untuk coba lagi.', 'idle');
-        updateBest(ms);
-        state = 'idle';
-        startBtn.classList.add('pulse');
-    }
+    if (state === 'ready') { stopAndMeasure(); }
 });
 
-// Aksesibilitas: klikBtn dinonaktifkan (kita pakai Enter)
-klikBtn.disabled = true;
+// TAP button works for both start (idle) and stop (ready)
+const tapAction = (e) => {
+    e.preventDefault();
+    if (state === 'idle') { mulaiGame(); return; }
+    if (state === 'waiting') {
+        clearTimeout(timer); timer = null; state = 'idle';
+        setStatus('Kepagian! Tekan START untuk ulang.', 'bad');
+        startBtn.classList.add('pulse');
+        readyVisual(false);
+        cueFalseStart();
+        return;
+    }
+    if (state === 'ready') { stopAndMeasure(); }
+};
+
+tapBtn.addEventListener('click', tapAction);
+tapBtn.addEventListener('pointerdown', tapAction, { passive: false });
+
+// Full-screen tap area (mobile) — aktif saat READY
+tapArea.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (state === 'ready') stopAndMeasure();
+}, { passive: false });
 
 // Awal tampilan
 setStatus('Siap', 'idle');
